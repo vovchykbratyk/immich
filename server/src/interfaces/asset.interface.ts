@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { AssetOrder } from 'src/entities/album.entity';
 import { AssetJobStatusEntity } from 'src/entities/asset-job-status.entity';
 import { AssetEntity, AssetType } from 'src/entities/asset.entity';
@@ -5,7 +6,6 @@ import { ExifEntity } from 'src/entities/exif.entity';
 import { ReverseGeocodeResult } from 'src/interfaces/metadata.interface';
 import { AssetSearchOptions, SearchExploreItem } from 'src/interfaces/search.interface';
 import { Paginated, PaginationOptions } from 'src/utils/pagination';
-import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
 
 export type AssetStats = Record<AssetType, number>;
 
@@ -62,7 +62,7 @@ export interface AssetBuilderOptions {
   isTrashed?: boolean;
   albumId?: string;
   personId?: string;
-  userIds?: string[];
+  userIds: string[];
   withStacked?: boolean;
   exifInfo?: boolean;
   assetType?: AssetType;
@@ -77,22 +77,6 @@ export interface TimeBucketItem {
   timeBucket: string;
   count: number;
 }
-
-export type AssetCreate = Pick<
-  AssetEntity,
-  | 'deviceAssetId'
-  | 'ownerId'
-  | 'libraryId'
-  | 'deviceId'
-  | 'type'
-  | 'originalPath'
-  | 'fileCreatedAt'
-  | 'localDateTime'
-  | 'fileModifiedAt'
-  | 'checksum'
-  | 'originalFileName'
-> &
-  Partial<AssetEntity>;
 
 export type AssetWithoutRelations = Omit<
   AssetEntity,
@@ -109,7 +93,23 @@ export type AssetWithoutRelations = Omit<
   | 'tags'
 >;
 
-export type AssetUpdateOptions = Pick<AssetWithoutRelations, 'id'> & Partial<AssetWithoutRelations>;
+export type AssetCreate = Pick<
+  AssetEntity,
+  | 'deviceAssetId'
+  | 'ownerId'
+  | 'libraryId'
+  | 'deviceId'
+  | 'type'
+  | 'originalPath'
+  | 'fileCreatedAt'
+  | 'localDateTime'
+  | 'fileModifiedAt'
+  | 'checksum'
+  | 'originalFileName'
+> &
+  Partial<AssetWithoutRelations>;
+
+export type AssetUpdateOptions = Pick<AssetEntity, 'id'> & Partial<AssetWithoutRelations>;
 
 export type AssetUpdateAllOptions = Omit<Partial<AssetWithoutRelations>, 'id'>;
 
@@ -127,10 +127,6 @@ export interface AssetExploreOptions extends AssetExploreFieldOptions {
   relation: keyof AssetEntity;
   relatedField: string;
   unnest?: boolean;
-}
-
-export interface MetadataSearchOptions {
-  numResults: number;
 }
 
 export interface AssetFullSyncOptions {
@@ -153,17 +149,13 @@ export const IAssetRepository = 'IAssetRepository';
 
 export interface IAssetRepository {
   create(asset: AssetCreate): Promise<AssetEntity>;
-  getByIds(
-    ids: string[],
-    relations?: FindOptionsRelations<AssetEntity>,
-    select?: FindOptionsSelect<AssetEntity>,
-  ): Promise<AssetEntity[]>;
+  getByIds(ids: string[], relations?: Prisma.AssetsInclude): Promise<AssetEntity[]>;
   getByIdsWithAllRelations(ids: string[]): Promise<AssetEntity[]>;
   getByDayOfYear(ownerIds: string[], monthDay: MonthDay): Promise<AssetEntity[]>;
   getByChecksum(libraryId: string, checksum: Buffer): Promise<AssetEntity | null>;
   getByAlbumId(pagination: PaginationOptions, albumId: string): Paginated<AssetEntity>;
   getByUserId(pagination: PaginationOptions, userId: string, options?: AssetSearchOptions): Paginated<AssetEntity>;
-  getById(id: string, relations?: FindOptionsRelations<AssetEntity>): Promise<AssetEntity | null>;
+  getById(id: string, relations?: Prisma.AssetsInclude): Promise<AssetEntity | null>;
   getWithout(pagination: PaginationOptions, property: WithoutProperty): Paginated<AssetEntity>;
   getWith(pagination: PaginationOptions, property: WithProperty, libraryId?: string): Paginated<AssetEntity>;
   getRandom(userId: string, count: number): Promise<AssetEntity[]>;
@@ -175,7 +167,7 @@ export interface IAssetRepository {
   getAll(pagination: PaginationOptions, options?: AssetSearchOptions): Paginated<AssetEntity>;
   getAllByDeviceId(userId: string, deviceId: string): Promise<string[]>;
   updateAll(ids: string[], options: Partial<AssetUpdateAllOptions>): Promise<void>;
-  update(asset: AssetUpdateOptions): Promise<void>;
+  update(asset: AssetUpdateOptions): Promise<AssetEntity>;
   remove(asset: AssetEntity): Promise<void>;
   softDeleteAll(ids: string[]): Promise<void>;
   restoreAll(ids: string[]): Promise<void>;
@@ -188,7 +180,6 @@ export interface IAssetRepository {
   upsertJobStatus(jobStatus: Partial<AssetJobStatusEntity>): Promise<void>;
   getAssetIdByCity(userId: string, options: AssetExploreFieldOptions): Promise<SearchExploreItem<string>>;
   getAssetIdByTag(userId: string, options: AssetExploreFieldOptions): Promise<SearchExploreItem<string>>;
-  searchMetadata(query: string, userIds: string[], options: MetadataSearchOptions): Promise<AssetEntity[]>;
   getAllForUserFullSync(options: AssetFullSyncOptions): Promise<AssetEntity[]>;
   getChangedDeltaSync(options: AssetDeltaSyncOptions): Promise<AssetEntity[]>;
 }

@@ -174,7 +174,7 @@ export type SmartSearchOptions = SearchDateOptions &
 export interface FaceEmbeddingSearch extends SearchEmbeddingOptions {
   hasPerson?: boolean;
   numResults: number;
-  maxDistance?: number;
+  maxDistance: number;
 }
 
 export interface FaceSearchResult {

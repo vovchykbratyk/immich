@@ -51,6 +51,7 @@ import { MetricRepository } from 'src/repositories/metric.repository';
 import { MoveRepository } from 'src/repositories/move.repository';
 import { PartnerRepository } from 'src/repositories/partner.repository';
 import { PersonRepository } from 'src/repositories/person.repository';
+import { PrismaRepository } from 'src/repositories/prisma.repository';
 import { SearchRepository } from 'src/repositories/search.repository';
 import { ServerInfoRepository } from 'src/repositories/server-info.repository';
 import { SessionRepository } from 'src/repositories/session.repository';
@@ -93,4 +94,5 @@ export const repositories = [
   { provide: ITagRepository, useClass: TagRepository },
   { provide: IMediaRepository, useClass: MediaRepository },
   { provide: IUserRepository, useClass: UserRepository },
+  { provide: PrismaRepository, useClass: PrismaRepository },
 ];
