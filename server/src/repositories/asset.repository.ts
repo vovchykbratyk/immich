@@ -372,7 +372,7 @@ export class AssetRepository implements IAssetRepository {
 
       case WithoutProperty.DUPLICATE: {
         where = {
-          resizePath: Not(IsNull()),
+          previewPath: Not(IsNull()),
           isVisible: true,
           smartSearch: true,
           jobStatus: {
@@ -716,7 +716,7 @@ export class AssetRepository implements IAssetRepository {
     }
 
     if (options.isDuplicate !== undefined) {
-      builder = builder.andWhere(`asset.duplicateId ${options.isDuplicate ? 'IS NOT NULL' : 'IS NULL'}`);
+      builder.andWhere(`asset.duplicateId ${options.isDuplicate ? 'IS NOT NULL' : 'IS NULL'}`);
     }
 
     if (options.personId !== undefined) {
